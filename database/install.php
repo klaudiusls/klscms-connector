@@ -1,5 +1,9 @@
 <?php
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 function klscms_connector_install() {
     global $wpdb;
     $table = $wpdb->prefix . 'klscms_submissions';

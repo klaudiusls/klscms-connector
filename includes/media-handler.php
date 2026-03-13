@@ -1,5 +1,9 @@
 <?php
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 function klscms_upload_media(WP_REST_Request $request) {
     $files = $request->get_file_params();
     if (!isset($files['file'])) {

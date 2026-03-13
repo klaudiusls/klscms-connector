@@ -1,5 +1,9 @@
 <?php
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 function klscms_get_submissions(WP_REST_Request $request) {
     global $wpdb;
     $table = $wpdb->prefix . 'klscms_submissions';

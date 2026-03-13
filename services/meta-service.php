@@ -1,5 +1,9 @@
 <?php
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 function klscms_get_fields_by_prefix(int $post_id, string $prefix): array
 {
     $all = get_post_meta($post_id);

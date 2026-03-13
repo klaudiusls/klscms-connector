@@ -1,5 +1,9 @@
 <?php
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 function klscms_health(WP_REST_Request $request) {
     return [
         'status' => 'ok',

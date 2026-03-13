@@ -7,6 +7,7 @@
  * Author: KLS CMS
  * Author URI: https://cms.klaudiusls.com
  * License: GPL2
+ * Text Domain: klscms-connector
  */
 
 if (!defined('ABSPATH')) {
