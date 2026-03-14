@@ -40,25 +40,27 @@ function klscms_install() {
     klscms_connector_install();
 }
 
-// Register Elementor Dynamic Tags
-add_action('plugins_loaded', function() {
-    if (!did_action('elementor/loaded')) {
-        add_action('elementor/loaded', 'klscms_register_elementor_tags');
-    } else {
-        klscms_register_elementor_tags();
-    }
-});
+/**
+ * Register Elementor Dynamic Tags
+ * Must hook into elementor/dynamic_tags/register
+ * which fires after Elementor is fully loaded
+ */
+add_action('elementor/dynamic_tags/register', 'klscms_register_dynamic_tags');
 
-function klscms_register_elementor_tags() {
-    add_action('elementor/dynamic_tags/register', function($manager) {
-        \Elementor\Plugin::$instance->dynamic_tags->register_group(
-            'klscms', ['title' => 'KLS CMS']
-        );
-        require_once KLSCMS_PLUGIN_DIR . 'elementor/class-klscms-dynamic-tag.php';
-        require_once KLSCMS_PLUGIN_DIR . 'elementor/class-klscms-image-tag.php';
-        $manager->register(new KLSCMS_Dynamic_Tag());
-        $manager->register(new KLSCMS_Image_Tag());
-    });
+function klscms_register_dynamic_tags($dynamic_tags_manager) {
+    // Register KLS CMS group
+    \Elementor\Plugin::$instance->dynamic_tags->register_group(
+        'klscms',
+        ['title' => 'KLS CMS']
+    );
+
+    // Load tag classes
+    require_once plugin_dir_path(__FILE__) . 'elementor/class-klscms-dynamic-tag.php';
+    require_once plugin_dir_path(__FILE__) . 'elementor/class-klscms-image-tag.php';
+
+    // Register tags
+    $dynamic_tags_manager->register(new KLSCMS_Dynamic_Tag());
+    $dynamic_tags_manager->register(new KLSCMS_Image_Tag());
 }
 
 
