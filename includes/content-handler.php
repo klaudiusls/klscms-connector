@@ -151,34 +151,32 @@ function klscms_debug_meta(WP_REST_Request $request) {
 }
 
 function klscms_purge_cache(WP_REST_Request $request) {
-    $page   = $request->get_param('page');
     $purged = false;
     $method = 'none';
 
-    // Method 1: LiteSpeed Cache
+    // LiteSpeed Cache — purge ALL (includes CSS/JS/ESI)
     if (class_exists('LiteSpeed\Purge')) {
-        $post = $page 
-            ? get_page_by_path($page, OBJECT, ['page', 'post']) 
-            : null;
-        if ($post) {
-            do_action('litespeed_purge_post', $post->ID);
-            $purged = true;
-            $method = 'litespeed_purge_post';
-        } else {
-            do_action('litespeed_purge_all');
-            $purged = true;
-            $method = 'litespeed_purge_all';
-        }
+        do_action('litespeed_purge_all');
+        $purged = true;
+        $method = 'litespeed_purge_all';
     }
 
-    // Method 2: LiteSpeed function fallback
+    // LiteSpeed function fallback
     if (!$purged && function_exists('litespeed_purge_all')) {
         litespeed_purge_all();
         $purged = true;
         $method = 'litespeed_purge_all_fn';
     }
 
-    // Method 3: Other cache plugins
+    // Clear Elementor CSS cache if active
+    if (defined('ELEMENTOR_VERSION')) {
+        if (class_exists('\Elementor\Plugin') && isset(\Elementor\Plugin::$instance->files_manager)) {
+            \Elementor\Plugin::$instance->files_manager->clear_cache();
+            $method .= '+elementor_css';
+        }
+    }
+
+    // Other cache plugins fallback
     if (!$purged) {
         if (function_exists('w3tc_flush_all')) {
             w3tc_flush_all();
@@ -198,6 +196,5 @@ function klscms_purge_cache(WP_REST_Request $request) {
     return rest_ensure_response([
         'purged' => $purged,
         'method' => $method,
-        'page'   => $page,
     ]);
 }
