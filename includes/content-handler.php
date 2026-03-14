@@ -149,3 +149,55 @@ function klscms_debug_meta(WP_REST_Request $request) {
         'total_meta_count' => count($all_meta),
     ]);
 }
+
+function klscms_purge_cache(WP_REST_Request $request) {
+    $page   = $request->get_param('page');
+    $purged = false;
+    $method = 'none';
+
+    // Method 1: LiteSpeed Cache
+    if (class_exists('LiteSpeed\Purge')) {
+        $post = $page 
+            ? get_page_by_path($page, OBJECT, ['page', 'post']) 
+            : null;
+        if ($post) {
+            do_action('litespeed_purge_post', $post->ID);
+            $purged = true;
+            $method = 'litespeed_purge_post';
+        } else {
+            do_action('litespeed_purge_all');
+            $purged = true;
+            $method = 'litespeed_purge_all';
+        }
+    }
+
+    // Method 2: LiteSpeed function fallback
+    if (!$purged && function_exists('litespeed_purge_all')) {
+        litespeed_purge_all();
+        $purged = true;
+        $method = 'litespeed_purge_all_fn';
+    }
+
+    // Method 3: Other cache plugins
+    if (!$purged) {
+        if (function_exists('w3tc_flush_all')) {
+            w3tc_flush_all();
+            $purged = true;
+            $method = 'w3tc';
+        } elseif (function_exists('rocket_clean_domain')) {
+            rocket_clean_domain();
+            $purged = true;
+            $method = 'wp_rocket';
+        } elseif (function_exists('wp_cache_clear_cache')) {
+            wp_cache_clear_cache();
+            $purged = true;
+            $method = 'wp_super_cache';
+        }
+    }
+
+    return rest_ensure_response([
+        'purged' => $purged,
+        'method' => $method,
+        'page'   => $page,
+    ]);
+}
