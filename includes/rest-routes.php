@@ -52,6 +52,12 @@ add_action('rest_api_init', function () {
         'callback' => 'klscms_get_submissions',
         'permission_callback' => 'klscms_validate_api_key',
     ]);
+
+    register_rest_route('klscms/v1', '/debug-meta', [
+        'methods' => 'GET',
+        'callback' => 'klscms_debug_meta',
+        'permission_callback' => 'klscms_validate_api_key',
+    ]);
 });
 
 function klscms_upload_media($request) {
