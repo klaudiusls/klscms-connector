@@ -2,9 +2,12 @@ $PluginSlug = "klscms-connector"
 $MainFile   = "klscms-connector.php"
 
 # Get version from plugin header
-$Version = (Get-Content $MainFile | 
-    Select-String "Version:" | 
-    Select-Object -First 1).ToString().Split(":")[1].Trim()
+$VersionLine = Get-Content $MainFile | Select-String "Version:\s*[0-9.]+" | Select-Object -First 1
+if (-not $VersionLine) {
+    Write-Error "Could not find Version header in $MainFile"
+    exit 1
+}
+$Version = $VersionLine.ToString().Split(":")[1].Trim()
 
 $OutputFile = "${PluginSlug}-v${Version}.zip"
 
@@ -40,5 +43,5 @@ $ZipContent = [System.IO.Compression.ZipFile]::OpenRead(
 )
 Write-Host "`nZip structure (first 10 entries):"
 $ZipContent.Entries | Select-Object -First 10 | 
-    ForEach-Object { Write-Host "  $($_.FullName)" }
+    ForEach-Object { Write-Host ("  " + $_.FullName) }
 $ZipContent.Dispose()
