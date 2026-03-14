@@ -1,0 +1,52 @@
+name: Build & Release Plugin
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get version
+        id: version
+        run: |
+          VERSION=$(grep "Version:" klscms-connector.php | head -1 | awk '{print $2}')
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "Plugin version: ${VERSION}"
+
+      - name: Build plugin zip
+        run: |
+          PLUGIN_SLUG="klscms-connector"
+          OUTPUT="${PLUGIN_SLUG}-v${{ steps.version.outputs.version }}.zip"
+          
+          mkdir -p /tmp/${PLUGIN_SLUG}
+          
+          rsync -av \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='*.zip' \
+            --exclude='node_modules' \
+            --exclude='build.sh' \
+            --exclude='build.ps1' \
+            . /tmp/${PLUGIN_SLUG}/
+          
+          cd /tmp
+          zip -r "${GITHUB_WORKSPACE}/${OUTPUT}" "${PLUGIN_SLUG}/"
+          
+          echo "Built: ${OUTPUT}"
+          unzip -l "${GITHUB_WORKSPACE}/${OUTPUT}" | head -20
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: "klscms-connector-v${{ steps.version.outputs.version }}.zip"
+          name: "v${{ steps.version.outputs.version }}"
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
