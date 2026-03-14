@@ -4,7 +4,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-function klscms_get_submissions(WP_REST_Request $request) {
+function klscms_handle_get_submissions(WP_REST_Request $request) {
     global $wpdb;
     $table = $wpdb->prefix . 'klscms_submissions';
     $form_id = $request->get_param('form_id');

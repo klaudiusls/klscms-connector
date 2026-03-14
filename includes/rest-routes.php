@@ -41,9 +41,32 @@ add_action('rest_api_init', function () {
         'permission_callback' => 'klscms_validate_api_key',
     ]);
 
+    register_rest_route('klscms/v1', '/media', [
+        'methods' => 'GET',
+        'callback' => 'klscms_get_media',
+        'permission_callback' => 'klscms_validate_api_key',
+    ]);
+
     register_rest_route('klscms/v1', '/submissions', [
         'methods' => 'GET',
         'callback' => 'klscms_get_submissions',
         'permission_callback' => 'klscms_validate_api_key',
     ]);
 });
+
+function klscms_upload_media($request) {
+    // Media handler logic
+    require_once plugin_dir_path(__FILE__) . 'media-handler.php';
+    return klscms_handle_media_upload($request);
+}
+
+function klscms_get_media($request) {
+    require_once plugin_dir_path(__FILE__) . 'media-handler.php';
+    return klscms_handle_get_media($request);
+}
+
+function klscms_get_submissions($request) {
+    // Submission handler logic
+    require_once plugin_dir_path(__FILE__) . 'submission-handler.php';
+    return klscms_handle_get_submissions($request);
+}
