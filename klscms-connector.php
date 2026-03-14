@@ -37,10 +37,6 @@ register_activation_hook(__FILE__, 'klscms_install');
 
 function klscms_install() {
     require_once KLSCMS_PLUGIN_DIR . 'database/install.php';
-    klscms_create_tables();
+    klscms_connector_install();
 }
 
-// Helper to access services
-function klscms_get_meta_service() {
-    return new KLSCMS_Meta_Service();
-}
