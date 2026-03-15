@@ -14,7 +14,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('KLSCMS_VERSION', '1.3.1');
+define('KLSCMS_VERSION', '1.3.2');
 define('KLSCMS_PLUGIN_DIR', plugin_dir_path(__FILE__));
 
 // Includes

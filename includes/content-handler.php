@@ -42,57 +42,63 @@ function klscms_get_content(WP_REST_Request $request) {
 
 function klscms_save_content(WP_REST_Request $request) {
     $payload = $request->get_json_params();
-    $page = isset($payload['page']) ? sanitize_text_field($payload['page']) : '';
+    $page_slug = isset($payload['page']) ? sanitize_text_field($payload['page']) : '';
     $fields = isset($payload['fields']) ? $payload['fields'] : [];
-    if (!$page || !is_array($fields)) {
+    
+    if (!$page_slug || !is_array($fields)) {
         return new WP_Error('klscms_bad_request', 'invalid payload', ['status' => 400]);
     }
-    $post_id = klscms_resolve_page_by_slug($page);
-    if (!$post_id) {
-        return new WP_Error('klscms_not_found', 'page not found', ['status' => 404]);
+    
+    $post_id = klscms_resolve_page_by_slug($page_slug);
+    
+    // Validate page exists
+    $page = get_page_by_path($page_slug, OBJECT, 'page');
+    if (!$page) {
+        return new WP_Error(
+            'page_not_found',
+            'Page slug not found: ' . sanitize_text_field($page_slug),
+            ['status' => 404]
+        );
     }
+    
+    if (!$post_id) {
+        // Double check with resolved ID just in case logic differs
+        return new WP_Error('klscms_not_found', 'page not found (id resolve failed)', ['status' => 404]);
+    }
+
+    $fields_saved = 0;
     foreach ($fields as $k => $v) {
         $key = sanitize_key($k);
+        $update_result = false;
         if (is_array($v)) {
-            update_post_meta($post_id, $key, wp_json_encode($v));
+            $update_result = update_post_meta($post_id, $key, wp_json_encode($v));
         } elseif (is_string($v)) {
             $decoded = json_decode($v, true);
             if (json_last_error() === JSON_ERROR_NONE) {
-                update_post_meta($post_id, $key, wp_json_encode($decoded));
+                $update_result = update_post_meta($post_id, $key, wp_json_encode($decoded));
             } else {
-                // Use klscms_sanitize_field from meta-service.php (which is included in main file)
-                // However, since this file (content-handler.php) is required in main file, 
-                // and meta-service.php is also required in main file, the function should be available.
-                // But wait, the current code in content-handler.php still uses sanitize_text_field.
-                // We should update it to use klscms_sanitize_field as per previous instruction if not already done.
-                // Oh, the previous instruction updated services/meta-service.php, but NOT content-handler.php!
-                // Wait, klscms_save_content calls update_post_meta DIRECTLY here in content-handler.php?
-                // Let's look at the read output of content-handler.php again.
-                // Yes, it does. This means the previous fix in services/meta-service.php MIGHT NOT be used here if this function duplicates logic.
-                // Ah, services/meta-service.php has klscms_update_fields function.
-                // But klscms_save_content in content-handler.php has its own loop!
-                // This is a code duplication issue.
-                // For now, I will just add verbose logging and use klscms_sanitize_field if available, or just leave sanitization as is if I am not asked to fix it here (though I should).
-                // The prompt says "Read the actual function to find correct variable names."
-                // I will add the verbose logging as requested.
-                
-                // Correction: I should use klscms_sanitize_field if I can, but to be safe and strictly follow the prompt "Add verbose logging", I will stick to the task.
-                // Actually, I should probably check if klscms_sanitize_field exists.
+                // Use klscms_sanitize_field if available
                 if (function_exists('klscms_sanitize_field')) {
-                     update_post_meta($post_id, $key, klscms_sanitize_field($v));
+                     $update_result = update_post_meta($post_id, $key, klscms_sanitize_field($v));
                 } else {
-                     update_post_meta($post_id, $key, sanitize_text_field($v));
+                     $update_result = update_post_meta($post_id, $key, sanitize_text_field($v));
                 }
             }
         } else {
-            update_post_meta($post_id, $key, $v);
+            $update_result = update_post_meta($post_id, $key, $v);
+        }
+        
+        if ($update_result !== false) {
+            $fields_saved++;
         }
     }
+    
     return rest_ensure_response([
         'status'       => 'success',
-        'post_id'      => $post_id ?? null,
-        'fields_saved' => count($fields ?? []),
-        'page'         => $page ?? null,
+        'success'      => true, // Add boolean success for consistency
+        'post_id'      => $post_id,
+        'fields_saved' => $fields_saved,
+        'page'         => $page_slug,
     ]);
 }
 
