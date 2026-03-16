@@ -64,6 +64,12 @@ add_action('rest_api_init', function () {
         'callback' => 'klscms_purge_cache',
         'permission_callback' => 'klscms_validate_api_key',
     ]);
+
+    register_rest_route('klscms/v1', '/site-structure', [
+        'methods'             => 'GET',
+        'callback'            => 'klscms_get_site_structure',
+        'permission_callback' => 'klscms_validate_api_key',
+    ]);
 });
 
 function klscms_upload_media($request) {
