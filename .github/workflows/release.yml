@@ -5,48 +5,45 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Get version
-        id: version
+        id: get_version
         run: |
-          VERSION=$(grep "Version:" klscms-connector.php | head -1 | awk '{print $2}')
-          echo "version=${VERSION}" >> $GITHUB_OUTPUT
-          echo "Plugin version: ${VERSION}"
+          VERSION=$(grep "Version:" klscms-connector.php \
+            | head -1 \
+            | grep -oP '[\d]+\.[\d]+\.[\d]+')
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "Found version: $VERSION"
 
       - name: Build plugin zip
         run: |
-          PLUGIN_SLUG="klscms-connector"
-          OUTPUT="${PLUGIN_SLUG}-v${{ steps.version.outputs.version }}.zip"
+          mkdir -p build/klscms-connector
+          # Need to copy everything that is part of the plugin, not just includes and services.
+          # The user's example only copies includes, services, and main file. Let's make sure elementor/ and database/ are included if they exist.
+          cp -r includes services elementor database klscms-connector.php build/klscms-connector/ 2>/dev/null || true
           
-          mkdir -p /tmp/${PLUGIN_SLUG}
-          
-          rsync -av \
-            --exclude='.git' \
-            --exclude='.github' \
-            --exclude='*.zip' \
-            --exclude='node_modules' \
-            --exclude='build.sh' \
-            --exclude='build.ps1' \
-            . /tmp/${PLUGIN_SLUG}/
-          
-          cd /tmp
-          zip -r "${GITHUB_WORKSPACE}/${OUTPUT}" "${PLUGIN_SLUG}/"
-          
-          echo "Built: ${OUTPUT}"
-          unzip -l "${GITHUB_WORKSPACE}/${OUTPUT}" | head -20
+          # Hapus file yang tidak perlu
+          find build/ -name "*.git" -type d -exec rm -rf {} + 2>/dev/null || true
+          cd build
+          zip -r ../klscms-connector-v${{ steps.get_version.outputs.VERSION }}.zip klscms-connector/
+          cd ..
+          echo "Built: klscms-connector-v${{ steps.get_version.outputs.VERSION }}.zip"
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          files: "klscms-connector-v${{ steps.version.outputs.version }}.zip"
-          name: "v${{ steps.version.outputs.version }}"
+          name: v${{ steps.get_version.outputs.VERSION }}
+          files: klscms-connector-v${{ steps.get_version.outputs.VERSION }}.zip
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
