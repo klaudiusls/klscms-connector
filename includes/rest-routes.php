@@ -70,6 +70,38 @@ add_action('rest_api_init', function () {
         'callback'            => 'klscms_get_site_structure',
         'permission_callback' => 'klscms_validate_api_key',
     ]);
+
+    // Posts CRUD
+    register_rest_route('klscms/v1', '/posts', [
+        [
+            'methods'             => 'GET',
+            'callback'            => 'klscms_get_posts',
+            'permission_callback' => 'klscms_validate_api_key',
+        ],
+        [
+            'methods'             => 'POST',
+            'callback'            => 'klscms_create_post',
+            'permission_callback' => 'klscms_validate_api_key',
+        ],
+    ]);
+
+    register_rest_route('klscms/v1', '/posts/(?P<id>\d+)', [
+        [
+            'methods'             => 'GET',
+            'callback'            => 'klscms_get_post',
+            'permission_callback' => 'klscms_validate_api_key',
+        ],
+        [
+            'methods'             => 'PUT',
+            'callback'            => 'klscms_update_post',
+            'permission_callback' => 'klscms_validate_api_key',
+        ],
+        [
+            'methods'             => 'DELETE',
+            'callback'            => 'klscms_delete_post',
+            'permission_callback' => 'klscms_validate_api_key',
+        ],
+    ]);
 });
 
 function klscms_upload_media($request) {
