@@ -71,6 +71,28 @@ add_action('rest_api_init', function () {
         'permission_callback' => 'klscms_validate_api_key',
     ]);
 
+    // CPT Management
+    register_rest_route('klscms/v1', '/post-types', [
+        [
+            'methods'             => 'GET',
+            'callback'            => 'klscms_get_post_types',
+            'permission_callback' => 'klscms_validate_api_key',
+        ],
+        [
+            'methods'             => 'POST',
+            'callback'            => 'klscms_create_post_type',
+            'permission_callback' => 'klscms_validate_api_key',
+        ],
+    ]);
+
+    register_rest_route('klscms/v1', '/post-types/(?P<slug>[a-zA-Z0-9_-]+)', [
+        [
+            'methods'             => 'DELETE',
+            'callback'            => 'klscms_delete_post_type',
+            'permission_callback' => 'klscms_validate_api_key',
+        ],
+    ]);
+
     // Posts CRUD
     register_rest_route('klscms/v1', '/posts', [
         [

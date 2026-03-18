@@ -14,7 +14,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('KLSCMS_VERSION', '1.5.0');
+define('KLSCMS_VERSION', '1.6.0');
 define('KLSCMS_PLUGIN_DIR', plugin_dir_path(__FILE__));
 
 // Includes
@@ -26,6 +26,7 @@ require_once KLSCMS_PLUGIN_DIR . 'includes/media-handler.php';
 require_once KLSCMS_PLUGIN_DIR . 'includes/submission-handler.php';
 require_once KLSCMS_PLUGIN_DIR . 'services/meta-service.php';
 require_once KLSCMS_PLUGIN_DIR . 'services/page-resolver.php';
+
 
 // Admin Settings
 if (is_admin()) {
