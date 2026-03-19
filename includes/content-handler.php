@@ -8,7 +8,7 @@ function klscms_health(WP_REST_Request $request) {
     return [
         'status' => 'ok',
         'plugin' => 'klscms-connector',
-        'version' => defined('KLSCMS_VERSION') ? KLSCMS_VERSION : '1.4.0'
+        'version' => defined('KLSCMS_VERSION') ? KLSCMS_VERSION : '1.6.1'
     ];
 }
 
