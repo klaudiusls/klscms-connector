@@ -99,11 +99,54 @@ function klscms_create_post(WP_REST_Request $request): WP_REST_Response
                 sanitize_text_field($value)
             );
         }
+
+        // 1. YOAST MAPPING (TASK 5)
+        if (isset($body['meta']['kls_seo_title'])) {
+            update_post_meta($post_id, '_yoast_wpseo_title', sanitize_text_field($body['meta']['kls_seo_title']));
+        }
+        if (isset($body['meta']['kls_seo_description'])) {
+            update_post_meta($post_id, '_yoast_wpseo_metadesc', sanitize_text_field($body['meta']['kls_seo_description']));
+        }
+        if (isset($body['meta']['kls_seo_keyword'])) {
+            update_post_meta($post_id, '_yoast_wpseo_focuskw', sanitize_text_field($body['meta']['kls_seo_keyword']));
+        }
+        // TASK 7: Additional Keywords
+        if (isset($body['meta']['kls_seo_additional_keywords'])) {
+            update_post_meta($post_id, '_yoast_wpseo_focuskeywords', sanitize_text_field($body['meta']['kls_seo_additional_keywords']));
+        }
     }
 
     // Set featured image from URL
     if (!empty($body['thumbnail_url'])) {
         klscms_set_featured_image($post_id, $body['thumbnail_url']);
+    }
+
+    // 2. FEATURED IMAGE SEO (TASK 6)
+    $thumbnail_id = get_post_thumbnail_id($post_id);
+    if ($thumbnail_id && !empty($body['meta'])) {
+        if (isset($body['meta']['kls_featured_image_alt'])) {
+            update_post_meta($thumbnail_id, '_wp_attachment_image_alt', sanitize_text_field($body['meta']['kls_featured_image_alt']));
+        }
+
+        $image_updates = ['ID' => $thumbnail_id];
+        $update_needed = false;
+
+        if (isset($body['meta']['kls_featured_image_title'])) {
+            $image_updates['post_title'] = sanitize_text_field($body['meta']['kls_featured_image_title']);
+            $update_needed = true;
+        }
+        if (isset($body['meta']['kls_featured_image_caption'])) {
+            $image_updates['post_excerpt'] = wp_kses_post($body['meta']['kls_featured_image_caption']);
+            $update_needed = true;
+        }
+        if (isset($body['meta']['kls_featured_image_description'])) {
+            $image_updates['post_content'] = wp_kses_post($body['meta']['kls_featured_image_description']);
+            $update_needed = true;
+        }
+
+        if ($update_needed) {
+            wp_update_post($image_updates);
+        }
     }
 
     return new WP_REST_Response([
@@ -155,6 +198,21 @@ function klscms_update_post(WP_REST_Request $request): WP_REST_Response
                 sanitize_text_field($value)
             );
         }
+
+        // 1. YOAST MAPPING (TASK 5)
+        if (isset($body['meta']['kls_seo_title'])) {
+            update_post_meta($id, '_yoast_wpseo_title', sanitize_text_field($body['meta']['kls_seo_title']));
+        }
+        if (isset($body['meta']['kls_seo_description'])) {
+            update_post_meta($id, '_yoast_wpseo_metadesc', sanitize_text_field($body['meta']['kls_seo_description']));
+        }
+        if (isset($body['meta']['kls_seo_keyword'])) {
+            update_post_meta($id, '_yoast_wpseo_focuskw', sanitize_text_field($body['meta']['kls_seo_keyword']));
+        }
+        // TASK 7: Additional Keywords
+        if (isset($body['meta']['kls_seo_additional_keywords'])) {
+            update_post_meta($id, '_yoast_wpseo_focuskeywords', sanitize_text_field($body['meta']['kls_seo_additional_keywords']));
+        }
     }
 
     // Update featured image
@@ -163,6 +221,34 @@ function klscms_update_post(WP_REST_Request $request): WP_REST_Response
             klscms_set_featured_image($id, $body['thumbnail_url']);
         } else {
             delete_post_thumbnail($id);
+        }
+    }
+
+    // 2. FEATURED IMAGE SEO (TASK 6)
+    $thumbnail_id = get_post_thumbnail_id($id);
+    if ($thumbnail_id && !empty($body['meta'])) {
+        if (isset($body['meta']['kls_featured_image_alt'])) {
+            update_post_meta($thumbnail_id, '_wp_attachment_image_alt', sanitize_text_field($body['meta']['kls_featured_image_alt']));
+        }
+
+        $image_updates = ['ID' => $thumbnail_id];
+        $update_needed = false;
+
+        if (isset($body['meta']['kls_featured_image_title'])) {
+            $image_updates['post_title'] = sanitize_text_field($body['meta']['kls_featured_image_title']);
+            $update_needed = true;
+        }
+        if (isset($body['meta']['kls_featured_image_caption'])) {
+            $image_updates['post_excerpt'] = wp_kses_post($body['meta']['kls_featured_image_caption']);
+            $update_needed = true;
+        }
+        if (isset($body['meta']['kls_featured_image_description'])) {
+            $image_updates['post_content'] = wp_kses_post($body['meta']['kls_featured_image_description']);
+            $update_needed = true;
+        }
+
+        if ($update_needed) {
+            wp_update_post($image_updates);
         }
     }
 
