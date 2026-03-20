@@ -98,7 +98,7 @@ function klscms_handle_get_media(WP_REST_Request $request) {
  
     return rest_ensure_response([
         'success'     => true,
-        'media'       => $media,
+        'items'       => $media,
         'total'       => $total,
         'total_pages' => $total_pages,
         'page'        => $page,
