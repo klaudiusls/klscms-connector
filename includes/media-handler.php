@@ -30,7 +30,12 @@ function klscms_handle_media_upload(WP_REST_Request $request) {
     if ($alt) {
         update_post_meta($attach_id, '_wp_attachment_image_alt', sanitize_text_field($alt));
     }
-    return ['id' => $attach_id, 'url' => $movefile['url']];
+    return [
+        'id' => $attach_id, 
+        'url' => $movefile['url'],
+        'title' => $attachment['post_title'],
+        'alt' => $alt ? sanitize_text_field($alt) : ''
+    ];
 }
 
 function klscms_handle_get_media(WP_REST_Request $request) {
