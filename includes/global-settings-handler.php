@@ -15,7 +15,7 @@ function klscms_get_global_settings(WP_REST_Request $request) {
         'site_url'        => get_option('siteurl', ''),
         'admin_email'     => get_option('admin_email', ''),
         'logo_url'        => klscms_get_logo_url(),
-        'favicon_url'     => get_option('klscms_favicon_url', ''),
+        'favicon_url'     => klscms_get_favicon_url(),
         'primary_color'   => get_option('klscms_primary_color', '#000000'),
         'secondary_color' => get_option('klscms_secondary_color', '#ffffff'),
         'contact_email'   => get_option('klscms_contact_email', ''),
@@ -113,4 +113,17 @@ function klscms_get_logo_url(): string {
         }
     }
     return get_option('klscms_logo_url', '');
+}
+
+function klscms_get_favicon_url(): string {
+    // WordPress native site icon (set via Appearance > Customize > Site Identity)
+    $icon_id = get_option('site_icon');
+    if ($icon_id) {
+        $src = wp_get_attachment_image_src((int) $icon_id, 'full');
+        if ($src) {
+            return $src[0];
+        }
+    }
+    // Fallback ke custom option jika native tidak ada
+    return get_option('klscms_favicon_url', '');
 }
