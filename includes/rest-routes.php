@@ -76,6 +76,49 @@ add_action('rest_api_init', function () {
         ],
     ]);
 
+    register_rest_route('klscms/v1', '/taxonomies', [
+        [
+            'methods'             => 'GET',
+            'callback'            => 'klscms_get_taxonomies',
+            'permission_callback' => 'klscms_validate_api_key',
+        ],
+    ]);
+
+    register_rest_route('klscms/v1', '/taxonomies/(?P<taxonomy>[a-zA-Z0-9_-]+)/terms', [
+        [
+            'methods'             => 'GET',
+            'callback'            => 'klscms_get_terms',
+            'permission_callback' => 'klscms_validate_api_key',
+            'args'                => [
+                'taxonomy' => ['required' => true, 'sanitize_callback' => 'sanitize_key'],
+                'page'     => ['default' => 1],
+                'per_page' => ['default' => 20],
+                'search'   => ['default' => ''],
+            ],
+        ],
+    ]);
+
+    register_rest_route('klscms/v1', '/taxonomies/(?P<taxonomy>[a-zA-Z0-9_-]+)/terms/(?P<term_id>\d+)', [
+        [
+            'methods'             => 'GET',
+            'callback'            => 'klscms_get_term',
+            'permission_callback' => 'klscms_validate_api_key',
+            'args'                => [
+                'taxonomy' => ['required' => true, 'sanitize_callback' => 'sanitize_key'],
+                'term_id'  => ['required' => true, 'validate_callback' => fn($v) => is_numeric($v) && $v > 0],
+            ],
+        ],
+        [
+            'methods'             => 'POST',
+            'callback'            => 'klscms_update_term',
+            'permission_callback' => 'klscms_validate_api_key',
+            'args'                => [
+                'taxonomy' => ['required' => true, 'sanitize_callback' => 'sanitize_key'],
+                'term_id'  => ['required' => true, 'validate_callback' => fn($v) => is_numeric($v) && $v > 0],
+            ],
+        ],
+    ]);
+
     register_rest_route('klscms/v1', '/acf-schemas', [
         [
             'methods'             => 'GET',
@@ -209,6 +252,26 @@ function klscms_delete_media($request) {
 function klscms_get_acf_schemas($request) {
     require_once plugin_dir_path(__FILE__) . 'acf-schema-handler.php';
     return klscms_handle_get_acf_schemas($request);
+}
+
+function klscms_get_taxonomies($request) {
+    require_once plugin_dir_path(__FILE__) . 'taxonomy-handler.php';
+    return klscms_handle_get_taxonomies($request);
+}
+
+function klscms_get_terms($request) {
+    require_once plugin_dir_path(__FILE__) . 'taxonomy-handler.php';
+    return klscms_handle_get_terms($request);
+}
+
+function klscms_get_term($request) {
+    require_once plugin_dir_path(__FILE__) . 'taxonomy-handler.php';
+    return klscms_handle_get_term($request);
+}
+
+function klscms_update_term($request) {
+    require_once plugin_dir_path(__FILE__) . 'taxonomy-handler.php';
+    return klscms_handle_update_term($request);
 }
 
 function klscms_get_acf_values($request) {
