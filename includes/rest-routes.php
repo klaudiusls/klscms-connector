@@ -54,6 +54,28 @@ add_action('rest_api_init', function () {
         ],
     ]);
 
+    register_rest_route('klscms/v1', '/posts/(?P<type>[a-zA-Z0-9_-]+)/(?P<id>\d+)/acf-values', [
+        [
+            'methods'             => 'GET',
+            'callback'            => 'klscms_get_acf_values',
+            'permission_callback' => 'klscms_validate_api_key',
+            'args'                => [
+                'type' => ['required' => true, 'sanitize_callback' => 'sanitize_key'],
+                'id'   => ['required' => true, 'validate_callback' => fn($v) => is_numeric($v) && $v > 0],
+            ],
+        ],
+        [
+            'methods'             => 'POST',
+            'callback'            => 'klscms_save_acf_values',
+            'permission_callback' => 'klscms_validate_api_key',
+            'args'                => [
+                'type'   => ['required' => true, 'sanitize_callback' => 'sanitize_key'],
+                'id'     => ['required' => true, 'validate_callback' => fn($v) => is_numeric($v) && $v > 0],
+                'values' => ['required' => true],
+            ],
+        ],
+    ]);
+
     register_rest_route('klscms/v1', '/acf-schemas', [
         [
             'methods'             => 'GET',
@@ -187,6 +209,16 @@ function klscms_delete_media($request) {
 function klscms_get_acf_schemas($request) {
     require_once plugin_dir_path(__FILE__) . 'acf-schema-handler.php';
     return klscms_handle_get_acf_schemas($request);
+}
+
+function klscms_get_acf_values($request) {
+    require_once plugin_dir_path(__FILE__) . 'acf-values-handler.php';
+    return klscms_handle_get_acf_values($request);
+}
+
+function klscms_save_acf_values($request) {
+    require_once plugin_dir_path(__FILE__) . 'acf-values-handler.php';
+    return klscms_handle_save_acf_values($request);
 }
 
 function klscms_get_submissions($request) {
