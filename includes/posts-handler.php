@@ -307,17 +307,24 @@ function klscms_format_post(WP_Post $post,
 
     if ($include_meta) {
         $data['content'] = $post->post_content;
-        // Get all custom meta (exclude internal WP meta)
         $all_meta = get_post_meta($post->ID);
         $custom_meta = [];
         foreach ($all_meta as $key => $values) {
-            // Skip WP internal meta keys
             if (strpos($key, '_') === 0) continue;
-            $custom_meta[$key] = count($values) === 1 
-                                 ? $values[0] 
+            $custom_meta[$key] = count($values) === 1
+                                 ? $values[0]
                                  : $values;
         }
         $data['meta'] = $custom_meta;
+
+        $data['seo'] = [
+            'focus_keyword'    => get_post_meta($post->ID, '_yoast_wpseo_focuskw', true) ?: '',
+            'meta_title'       => get_post_meta($post->ID, '_yoast_wpseo_title', true) ?: '',
+            'meta_description' => get_post_meta($post->ID, '_yoast_wpseo_metadesc', true) ?: '',
+            'canonical'        => get_post_meta($post->ID, '_yoast_wpseo_canonical', true) ?: '',
+            'og_title'         => get_post_meta($post->ID, '_yoast_wpseo_opengraph-title', true) ?: '',
+            'og_description'   => get_post_meta($post->ID, '_yoast_wpseo_opengraph-description', true) ?: '',
+        ];
     }
 
     return $data;
