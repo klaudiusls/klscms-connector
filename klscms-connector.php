@@ -3,7 +3,7 @@
  * Plugin Name: KLS CMS Connector
  * Plugin URI: https://cms.klaudiusls.com
  * Description: Connects WordPress to KLS CMS Portal via REST API.
- * Version: 1.9.1
+ * Version: 1.9.2
  * Author: KLS CMS
  * Author URI: https://cms.klaudiusls.com
  * License: GPL2
@@ -14,7 +14,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('KLSCMS_VERSION', '1.9.1');
+define('KLSCMS_VERSION', '1.9.2');
 define('KLSCMS_PLUGIN_DIR', plugin_dir_path(__FILE__));
 
 // Includes

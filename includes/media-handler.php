@@ -60,6 +60,34 @@ function klscms_handle_media_upload(WP_REST_Request $request) {
     ];
 }
 
+function klscms_handle_delete_media(WP_REST_Request $request) {
+    $attachment_id = (int) $request->get_param('id');
+
+    if (!$attachment_id) {
+        return new WP_Error('klscms_bad_request', 'Attachment ID required', ['status' => 400]);
+    }
+
+    // Verify it's actually an attachment
+    $attachment = get_post($attachment_id);
+    if (!$attachment || $attachment->post_type !== 'attachment') {
+        return new WP_Error('klscms_not_found', 'Media not found', ['status' => 404]);
+    }
+
+    // wp_delete_attachment(id, force_delete)
+    // true = bypass trash, permanently delete + all generated thumbnails
+    $result = wp_delete_attachment($attachment_id, true);
+
+    if (!$result) {
+        return new WP_Error('klscms_delete_failed', 'Failed to delete media', ['status' => 500]);
+    }
+
+    return rest_ensure_response([
+        'success' => true,
+        'deleted' => $attachment_id,
+        'message' => 'Media permanently deleted from WordPress.',
+    ]);
+}
+
 function klscms_handle_get_media(WP_REST_Request $request) {
     // Auth handled by permission_callback
     

@@ -43,15 +43,29 @@ add_action('rest_api_init', function () {
 
     register_rest_route('klscms/v1', '/media', [
         [
-            'methods' => 'GET',
-            'callback' => 'klscms_get_media',
+            'methods'             => 'GET',
+            'callback'            => 'klscms_get_media',
             'permission_callback' => 'klscms_validate_api_key',
         ],
         [
-            'methods' => 'POST',
-            'callback' => 'klscms_upload_media',
+            'methods'             => 'POST',
+            'callback'            => 'klscms_upload_media',
             'permission_callback' => 'klscms_validate_api_key',
-        ]
+        ],
+    ]);
+
+    register_rest_route('klscms/v1', '/media/(?P<id>\d+)', [
+        [
+            'methods'             => 'DELETE',
+            'callback'            => 'klscms_delete_media',
+            'permission_callback' => 'klscms_validate_api_key',
+            'args'                => [
+                'id' => [
+                    'required'          => true,
+                    'validate_callback' => fn($v) => is_numeric($v) && $v > 0,
+                ],
+            ],
+        ],
     ]);
 
     register_rest_route('klscms/v1', '/submissions', [
@@ -155,6 +169,11 @@ function klscms_upload_media($request) {
 function klscms_get_media($request) {
     require_once plugin_dir_path(__FILE__) . 'media-handler.php';
     return klscms_handle_get_media($request);
+}
+
+function klscms_delete_media($request) {
+    require_once plugin_dir_path(__FILE__) . 'media-handler.php';
+    return klscms_handle_delete_media($request);
 }
 
 function klscms_get_submissions($request) {
