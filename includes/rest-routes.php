@@ -54,6 +54,14 @@ add_action('rest_api_init', function () {
         ],
     ]);
 
+    register_rest_route('klscms/v1', '/acf-schemas', [
+        [
+            'methods'             => 'GET',
+            'callback'            => 'klscms_get_acf_schemas',
+            'permission_callback' => 'klscms_validate_api_key',
+        ],
+    ]);
+
     register_rest_route('klscms/v1', '/media/(?P<id>\d+)', [
         [
             'methods'             => 'DELETE',
@@ -174,6 +182,11 @@ function klscms_get_media($request) {
 function klscms_delete_media($request) {
     require_once plugin_dir_path(__FILE__) . 'media-handler.php';
     return klscms_handle_delete_media($request);
+}
+
+function klscms_get_acf_schemas($request) {
+    require_once plugin_dir_path(__FILE__) . 'acf-schema-handler.php';
+    return klscms_handle_get_acf_schemas($request);
 }
 
 function klscms_get_submissions($request) {

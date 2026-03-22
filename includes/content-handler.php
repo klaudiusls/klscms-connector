@@ -8,7 +8,7 @@ function klscms_health(WP_REST_Request $request) {
     return [
         'status' => 'ok',
         'plugin' => 'klscms-connector',
-        'version' => defined('KLSCMS_VERSION') ? KLSCMS_VERSION : '1.8.3'
+        'version' => defined('KLSCMS_VERSION') ? KLSCMS_VERSION : '1.9.3'
     ];
 }
 
@@ -20,7 +20,7 @@ function klscms_site_info(WP_REST_Request $request) {
         'site_name' => get_option('blogname'),
         'wordpress_version' => get_bloginfo('version'),
         'elementor_installed' => (bool) $elementor,
-        'plugin_version' => defined('KLSCMS_VERSION') ? KLSCMS_VERSION : '1.8.3',
+        'plugin_version' => defined('KLSCMS_VERSION') ? KLSCMS_VERSION : '1.9.3',
     ];
 }
 
